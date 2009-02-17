@@ -1,26 +1,27 @@
 module Rack
   module Mount
-    class Bucket < Array
-      def self.hash(max, method, path)
-        path.sub(/^\//, "").split("/")[0].hash % max
+    class Bucket < Hash
+      def initialize
+        @default = []
+        super(@default)
       end
 
-      def initialize(max)
-        @max = max
-        @max.times { |n| self[n] = [] }
+      def []=(key, value)
+        v = self[key]
+        v = v.dup if v.equal?(@default)
+        v << value
+        super(key, v)
+      end
+
+      def <<(value)
+        @default << value
+        values.each { |e| e << value }
+        nil
       end
 
       def freeze
-        each { |e| e.freeze }
+        @default.freeze
         super
-      end
-
-      def at(*keys)
-        super(self.class.hash(@max, *keys))
-      end
-
-      def longest_child
-        max { |a, b| a.length <=> b.length }.length
       end
     end
   end

@@ -1,13 +1,8 @@
 module Rack
   module Mount
     class RouteSet
-      DEFAULT_MAX = 100
-
-      attr_reader :max
-
-      def initialize(max = DEFAULT_MAX)
+      def initialize
         @routes = []
-        @max = max
       end
 
       def draw
@@ -16,20 +11,20 @@ module Rack
       end
 
       def add_route(path, options = {})
-        route = Route.new(self, options[:method], path, options[:app])
+        route = Route.new(options[:method], path, options[:app])
         @routes << route
         route
       end
 
       def freeze
-        @buckets = build_tree(@max)
+        @buckets = build_tree
         super
       end
 
       def call(env)
         method = env["REQUEST_METHOD"]
         path = env["PATH_INFO"]
-        @buckets.at(method, path).each do |route|
+        @buckets[Route.first_segment(path)].each do |route|
           result = route.call(env)
           return result unless result[0] == 404
         end
@@ -41,26 +36,20 @@ module Rack
       end
 
       def worst_case
-        @buckets.longest_child
-      end
-
-      def utilization
-        used = @buckets.reject { |e| e.empty? }.length
-        total = @buckets.length
-        (used / total.to_f) * 100
+        @buckets.values.max { |a, b| a.length <=> b.length }.length
       end
 
       private
-        def build_tree(max)
-          bucket = Bucket.new(@max)
+        def build_tree
+          bucket = Bucket.new
           @routes.each do |route|
-            max.times do |n|
-              if route.hash?(n)
-                bucket[n] << route
-              end
+            if route.dynamic?
+              bucket << route
+            else
+              bucket[route.key] = route
             end
           end
-          bucket
+          bucket.freeze
         end
     end
   end

@@ -16,6 +16,8 @@ Map = lambda do |map|
     map.connect "#{resouce}/:id", :method => :put, :app => App
     map.connect "#{resouce}/:id", :method => :delete, :app => App
   end
+
+  map.connect ":controller/:action/:id", :app => App
 end
 
 Env = {
@@ -23,32 +25,13 @@ Env = {
   "PATH_INFO" => "/zz/1"
 }
 
-
-def generate_set(n)
-  set = Rack::Mount::RouteSet.new(n)
-  set.draw(&Map)
-  puts "  #{set.size}\t\t#{n}\t\t#{set.utilization}%\t\t#{set.worst_case}"
-  set
-end
-
-puts "Building...\n"
-
-puts " Routes\t\tBuckets\t\tUtilization\tWorst Case"
-puts "==========================================================="
-Bucket1Routes   = generate_set(1)
-Bucket10Routes  = generate_set(10)
-Bucket100Routes = generate_set(100)
-Bucket500Routes = generate_set(500)
-
-puts "\nRecognizing..."
+Routes = Rack::Mount::RouteSet.new
+Routes.draw(&Map)
 
 require 'benchmark'
 
-TIMES = 100.to_i
+TIMES = 10_000.to_i
 
 Benchmark.bmbm do |x|
-  x.report("1 bucket")    { TIMES.times { Bucket1Routes.call(Env.dup) } }
-  x.report("10 buckets")  { TIMES.times { Bucket10Routes.call(Env.dup) } }
-  x.report("100 buckets") { TIMES.times { Bucket100Routes.call(Env.dup) } }
-  x.report("500 buckets") { TIMES.times { Bucket500Routes.call(Env.dup) } }
+  x.report("hash bucket") { TIMES.times { Routes.call(Env.dup) } }
 end

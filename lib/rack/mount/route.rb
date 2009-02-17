@@ -1,8 +1,11 @@
 module Rack
   module Mount
     class Route
-      def initialize(set, method, string, app)
-        @set = set
+      def self.first_segment(path)
+        path.sub(/^\//, "").split("/")[0]
+      end
+
+      def initialize(method, string, app)
         @method = method.to_s.upcase if method
         @app = app
         @string = string
@@ -39,8 +42,12 @@ module Rack
         @recognizer = Regexp.compile("^/#{segments.join("\/")}$")
       end
 
-      def hash?(n)
-        @dynamic || Bucket.hash(@set.max, @method, @string) == n
+      def dynamic?
+        @dynamic
+      end
+
+      def key
+        Route.first_segment(@string)
       end
 
       def call(env)
