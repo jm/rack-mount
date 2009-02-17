@@ -1,11 +1,13 @@
 module Rack
   module Mount
     class RouteSet
+      DEFAULT_MAX = 100
+
       attr_reader :max
 
-      def initialize
+      def initialize(max = DEFAULT_MAX)
         @routes = []
-        @max = 100
+        @max = max
       end
 
       def draw
@@ -34,8 +36,18 @@ module Rack
         nil
       end
 
+      def size
+        @routes.length
+      end
+
       def worst_case
         @buckets.longest_child
+      end
+
+      def utilization
+        used = @buckets.reject { |e| e.empty? }.length
+        total = @buckets.length
+        (used / total.to_f) * 100
       end
 
       private
