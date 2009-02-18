@@ -1,6 +1,8 @@
 module Rack
   module Mount
     class Route
+      SKIP_RESPONSE = [404, {"Content-Type" => "text/html"}, "Not Found"]
+
       def self.first_segment(path)
         path.sub(/^\//, "").split("/")[0]
       end
