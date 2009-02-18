@@ -23,17 +23,14 @@ module Rack
           next if segment.empty?
           segment = local_segment = Regexp.escape(segment)
 
-          if segment =~ /:\w+/
-            segment_symbols = segment.scan(/:(\w+)/).flatten
-            segment_symbols.each do |segment_symbol|
-              @params << segment_symbol.to_sym
-              local_segment = segment.gsub(/:#{segment_symbol}/, "(.*)")
-              segment.gsub!(/:#{segment_symbol}/, ".*")
-            end
-          elsif segment =~ /^\*w+/
-            @params << segment.to_sym
-            local_segment = segment.gsub(/:#{segment_symbol}/, "(.*)")
-            segment.gsub!(/:#{segment_symbol}/, ".*")
+          if segment =~ /^:(\w+)$/
+            @params << $1.to_sym
+            local_segment = "(.*)"
+            segment.gsub!(segment, ".*")
+          elsif segment =~ /^\\\*(\w+)$/
+            @params << $1.to_sym
+            local_segment = "(.*)"
+            segment.gsub!(segment, ".*")
           end
 
           local_segments << local_segment

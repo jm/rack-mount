@@ -21,6 +21,8 @@ class MountTest < Test::Unit::TestCase
       map.connect "#{resouce}/:id", :method => :delete, :app => App
     end
 
+    map.connect "files/*files", :app => App
+
     map.connect ":controller/:action/:id", :app => App
   end
 
@@ -36,6 +38,11 @@ class MountTest < Test::Unit::TestCase
 
     env = process(:get, "/companies/3")
     assert_equal({ :id => "3" }, env["rack.routing_args"])
+
+    env = process(:get, "/files/images/photo.jpg")
+    # TODO
+    # assert_equal({:files => ["images", "photo.jpg"]}, env["rack.routing_args"])
+    assert_equal({:files => "images/photo.jpg"}, env["rack.routing_args"])
 
     env = process(:get, "/foo/bar/1")
     assert_equal({ :controller => "foo", :action => "bar", :id => "1" },
