@@ -27,28 +27,29 @@ class MountTest < Test::Unit::TestCase
   end
 
   def test_routing
-    env = process(:get, "/people")
+    get "/people"
     assert_equal({}, env["rack.routing_args"])
 
-    env = process(:get, "/people/1")
+    get "/people/1"
     assert_equal({ :id => "1" }, env["rack.routing_args"])
 
-    env = process(:get, "/people/2/edit")
+    get "/people/2/edit"
     assert_equal({ :id => "2" }, env["rack.routing_args"])
 
-    env = process(:get, "/companies/3")
+    get "/companies/3"
     assert_equal({ :id => "3" }, env["rack.routing_args"])
 
-    env = process(:get, "/files/images/photo.jpg")
+    get "/files/images/photo.jpg"
     # TODO
     # assert_equal({:files => ["images", "photo.jpg"]}, env["rack.routing_args"])
     assert_equal({:files => "images/photo.jpg"}, env["rack.routing_args"])
 
-    env = process(:get, "/foo/bar/1")
+    get "/foo/bar/1"
     assert_equal({ :controller => "foo", :action => "bar", :id => "1" },
       env["rack.routing_args"])
 
-    assert_nil process(:get, "/widgets/3")
+    get "/widgets/3"
+    assert_nil env
   end
 
   def test_worst_case
@@ -59,6 +60,26 @@ class MountTest < Test::Unit::TestCase
   end
 
   private
+    def env
+      @env
+    end
+
+    def get(path)
+      process(:get, path)
+    end
+
+    def post(path)
+      process(:post, path)
+    end
+
+    def put(path)
+      process(:put, path)
+    end
+
+    def delete(path)
+      process(:delete, path)
+    end
+
     def process(method, path)
       result = Routes.call({
         "REQUEST_METHOD" => method.to_s.upcase,
@@ -66,9 +87,9 @@ class MountTest < Test::Unit::TestCase
       })
 
       if result
-        YAML.load(result[2][0])
+        @env = YAML.load(result[2][0])
       else
-        nil
+        @env = nil
       end
     end
 end
