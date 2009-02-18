@@ -1,29 +1,29 @@
-require 'test/unit'
-require 'rack/mount'
-require 'yaml'
+require 'test_helper'
 
 class MountTest < Test::Unit::TestCase
-  App = lambda { |env|
-    [200, {"Content-Type" => "text/yaml"}, [YAML.dump(env)]]
-  }
+  include TestHelper
 
   Routes = Rack::Mount::RouteSet.new
   Routes.draw do |map|
     resources = [:people, :companies]
 
     resources.each do |resouce|
-      map.connect "#{resouce}", :method => :get, :app => App
-      map.connect "#{resouce}", :method => :post, :app => App
-      map.connect "#{resouce}/new", :method => :get, :app => App
-      map.connect "#{resouce}/:id/edit", :method => :get, :app => App
-      map.connect "#{resouce}/:id", :method => :get, :app => App
-      map.connect "#{resouce}/:id", :method => :put, :app => App
-      map.connect "#{resouce}/:id", :method => :delete, :app => App
+      map.connect "#{resouce}", :method => :get, :app => EchoApp
+      map.connect "#{resouce}", :method => :post, :app => EchoApp
+      map.connect "#{resouce}/new", :method => :get, :app => EchoApp
+      map.connect "#{resouce}/:id/edit", :method => :get, :app => EchoApp
+      map.connect "#{resouce}/:id", :method => :get, :app => EchoApp
+      map.connect "#{resouce}/:id", :method => :put, :app => EchoApp
+      map.connect "#{resouce}/:id", :method => :delete, :app => EchoApp
     end
 
-    map.connect "files/*files", :app => App
+    map.connect "files/*files", :app => EchoApp
 
-    map.connect ":controller/:action/:id", :app => App
+    map.connect ":controller/:action/:id", :app => EchoApp
+  end
+
+  def setup
+    @app = Routes
   end
 
   def test_routing
@@ -58,38 +58,4 @@ class MountTest < Test::Unit::TestCase
     # routes are added to the test fixture.
     assert_equal 8, Routes.worst_case
   end
-
-  private
-    def env
-      @env
-    end
-
-    def get(path)
-      process(:get, path)
-    end
-
-    def post(path)
-      process(:post, path)
-    end
-
-    def put(path)
-      process(:put, path)
-    end
-
-    def delete(path)
-      process(:delete, path)
-    end
-
-    def process(method, path)
-      result = Routes.call({
-        "REQUEST_METHOD" => method.to_s.upcase,
-        "PATH_INFO" => path
-      })
-
-      if result
-        @env = YAML.load(result[2][0])
-      else
-        @env = nil
-      end
-    end
 end
