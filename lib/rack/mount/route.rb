@@ -2,6 +2,7 @@ module Rack
   module Mount
     class Route
       SKIP_RESPONSE = [404, {"Content-Type" => "text/html"}, "Not Found"]
+      SEPARATORS = %w( / . ? )
 
       def self.first_segment(path)
         path.sub(/^\//, "").split("/")[0]
@@ -25,8 +26,8 @@ module Rack
 
           if segment =~ /^:(\w+)$/
             @params << $1.to_sym
-            local_segment = "(.*)"
-            segment.gsub!(segment, ".*")
+            local_segment = "([^#{SEPARATORS.join}]+)"
+            segment.gsub!(segment, "[^#{SEPARATORS.join}]+")
           elsif segment =~ /^\\\*(\w+)$/
             @params << $1.to_sym
             local_segment = "(.*)"

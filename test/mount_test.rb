@@ -36,6 +36,12 @@ class MountTest < Test::Unit::TestCase
     get "/people/2/edit"
     assert_equal({ :id => "2" }, env["rack.routing_args"])
 
+    get "/people/new"
+    assert_equal({}, env["rack.routing_args"])
+
+    post "/people/new"
+    assert_nil env
+
     get "/companies/3"
     assert_equal({ :id => "3" }, env["rack.routing_args"])
 
