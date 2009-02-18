@@ -6,7 +6,7 @@ module Rack
       end
 
       def draw
-        yield Mapper.new(self)
+        yield Mappers::RailsClassic.new(self)
         freeze
       end
 
