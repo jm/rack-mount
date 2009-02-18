@@ -55,7 +55,7 @@ module Rack
         path = env["PATH_INFO"]
 
         if (@method.nil? || method == @method) && path =~ @recognizer
-          param_matches = path.sub(/^\//, "").scan(@local_recognizer).flatten
+          param_matches = path.scan(@local_recognizer).flatten
           routing_args = {}
           @params.each_with_index { |p,i| routing_args[p] = param_matches[i] }
 
