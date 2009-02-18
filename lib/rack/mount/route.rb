@@ -14,9 +14,6 @@ module Rack
         @string = string
         string.sub!(/^\//, "")
 
-        # Mark as dynamic only if the first segment is dynamic
-        @dynamic = (@string =~ /^:/) ? true : false
-
         @params = []
         local_segments = []
 
@@ -36,10 +33,13 @@ module Rack
 
           local_segments << local_segment
           segment
-        }.compact
+        }
+
+        # Mark as dynamic only if the first segment is dynamic
+        @dynamic = segments[0] =~ /[\^\/\.\?]/ ? true : false
 
         @local_recognizer = Regexp.compile("#{local_segments.compact.join("\/")}")
-        @recognizer = Regexp.compile("^/#{segments.join("\/")}$")
+        @recognizer = Regexp.compile("^/#{segments.compact.join("\/")}$")
       end
 
       def dynamic?
