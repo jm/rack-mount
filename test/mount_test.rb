@@ -51,6 +51,13 @@ class MountTest < Test::Unit::TestCase
     assert_nil process(:get, "/widgets/3")
   end
 
+  def test_worst_case
+    # Make sure we aren't making the tree less efficient. Its okay if
+    # this number gets smaller. However it may increase if the more
+    # routes are added to the test fixture.
+    assert_equal 8, Routes.worst_case
+  end
+
   private
     def process(method, path)
       result = Routes.call({
