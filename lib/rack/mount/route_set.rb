@@ -10,6 +10,11 @@ module Rack
         freeze
       end
 
+      def prepare
+        yield Mappers::Merb.new(self)
+        freeze
+      end
+
       def add_route(path, options = {})
         route = Route.new(options[:method], path, options[:app])
         @routes << route
