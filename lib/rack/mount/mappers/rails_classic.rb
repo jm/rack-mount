@@ -7,7 +7,11 @@ module Rack
         end
 
         def connect(path, options = {})
-          @set.add_route(path, options)
+          if conditions = options.delete(:conditions)
+            method = conditions.delete(:method)
+          end
+
+          @set.add_route(method, path, options)
         end
       end
     end

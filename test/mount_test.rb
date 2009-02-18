@@ -8,13 +8,13 @@ class MountTest < Test::Unit::TestCase
     resources = [:people, :companies]
 
     resources.each do |resouce|
-      map.connect "#{resouce}", :method => :get, :app => EchoApp
-      map.connect "#{resouce}", :method => :post, :app => EchoApp
-      map.connect "#{resouce}/new", :method => :get, :app => EchoApp
-      map.connect "#{resouce}/:id/edit", :method => :get, :app => EchoApp
-      map.connect "#{resouce}/:id", :method => :get, :app => EchoApp
-      map.connect "#{resouce}/:id", :method => :put, :app => EchoApp
-      map.connect "#{resouce}/:id", :method => :delete, :app => EchoApp
+      map.connect "#{resouce}", :app => EchoApp, :conditions => { :method => :get }
+      map.connect "#{resouce}", :app => EchoApp, :conditions => { :method => :post }
+      map.connect "#{resouce}/new", :app => EchoApp, :conditions => { :method => :get }
+      map.connect "#{resouce}/:id/edit", :app => EchoApp, :conditions => { :method => :get }
+      map.connect "#{resouce}/:id", :app => EchoApp, :conditions => { :method => :get }
+      map.connect "#{resouce}/:id", :app => EchoApp, :conditions => { :method => :put }
+      map.connect "#{resouce}/:id", :app => EchoApp, :conditions => { :method => :delete }
     end
 
     map.connect "files/*files", :app => EchoApp

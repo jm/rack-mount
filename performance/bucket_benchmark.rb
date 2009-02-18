@@ -8,13 +8,13 @@ Map = lambda do |map|
   resources = ("a".."zz")
 
   resources.each do |resouce|
-    map.connect "#{resouce}", :method => :get, :app => App
-    map.connect "#{resouce}", :method => :post, :app => App
-    map.connect "#{resouce}/new", :method => :get, :app => App
-    map.connect "#{resouce}/:id/edit", :method => :get, :app => App
-    map.connect "#{resouce}/:id", :method => :get, :app => App
-    map.connect "#{resouce}/:id", :method => :put, :app => App
-    map.connect "#{resouce}/:id", :method => :delete, :app => App
+    map.connect "#{resouce}", :app => App, :conditions => { :method => :get }
+    map.connect "#{resouce}", :app => App, :conditions => { :method => :post }
+    map.connect "#{resouce}/new", :app => App, :conditions => { :method => :get }
+    map.connect "#{resouce}/:id/edit", :app => App, :conditions => { :method => :get }
+    map.connect "#{resouce}/:id", :app => App, :conditions => { :method => :get }
+    map.connect "#{resouce}/:id", :app => App, :conditions => { :method => :put }
+    map.connect "#{resouce}/:id", :app => App, :conditions => { :method => :delete }
   end
 
   map.connect ":controller/:action/:id", :app => App
