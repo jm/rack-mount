@@ -10,8 +10,10 @@ module Rack
         freeze
       end
 
-      def prepare
-        yield Mappers::Merb.new(self)
+      def prepare(&block)
+        proxy = Mappers::Merb::Proxy.new
+        proxy.push(Mappers::Merb.new(self, proxy))
+        proxy.instance_eval(&block)
         freeze
       end
 
