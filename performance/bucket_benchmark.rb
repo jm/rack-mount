@@ -5,9 +5,9 @@ App = lambda { |env|
 }
 
 Map = lambda do |map|
-  resouces = ("a".."zz")
+  resources = ("a".."zz")
 
-  resouces.each do |resouce|
+  resources.each do |resouce|
     map.connect "#{resouce}", :method => :get, :app => App
     map.connect "#{resouce}", :method => :post, :app => App
     map.connect "#{resouce}/new", :method => :get, :app => App

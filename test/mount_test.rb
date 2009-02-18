@@ -9,9 +9,9 @@ class MountTest < Test::Unit::TestCase
 
   Routes = Rack::Mount::RouteSet.new
   Routes.draw do |map|
-    resouces = [:people, :companies]
+    resources = [:people, :companies]
 
-    resouces.each do |resouce|
+    resources.each do |resouce|
       map.connect "#{resouce}", :method => :get, :app => App
       map.connect "#{resouce}", :method => :post, :app => App
       map.connect "#{resouce}/new", :method => :get, :app => App
