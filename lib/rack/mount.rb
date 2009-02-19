@@ -4,5 +4,6 @@ module Rack
     autoload :Mappers, 'rack/mount/mappers'
     autoload :Route, 'rack/mount/route'
     autoload :RouteSet, 'rack/mount/route_set'
+    autoload :SegmentString, 'rack/mount/segment_string'
   end
 end

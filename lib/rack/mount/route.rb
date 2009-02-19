@@ -2,11 +2,6 @@ module Rack
   module Mount
     class Route
       SKIP_RESPONSE = [404, {"Content-Type" => "text/html"}, "Not Found"]
-      SEPARATORS = %w( / . ? )
-
-      def self.first_segment(path)
-        path.sub(/^\//, "").split("/")[0]
-      end
 
       def initialize(options)
         @app = options.delete(:app)
@@ -16,36 +11,15 @@ module Rack
         @method = method.to_s.upcase if method
 
         @path = options.delete(:path)
-        @path.sub!(/^\//, "")
 
-        requirements = options.delete(:requirements) || {}
-
-        @params = []
-        local_segments = []
-
-        segments = @path.split("/").map! { |segment|
-          next if segment.empty?
-          segment = local_segment = Regexp.escape(segment)
-
-          if segment =~ /^:(\w+)$/
-            @params << $1.to_sym
-            local_segment = "(#{requirements[$1.to_sym] || "[^#{SEPARATORS.join}]+"})"
-            segment.gsub!(segment, "#{requirements[$1.to_sym] || "[^#{SEPARATORS.join}]+"}")
-          elsif segment =~ /^\\\*(\w+)$/
-            @params << $1.to_sym
-            local_segment = "(.*)"
-            segment.gsub!(segment, ".*")
-          end
-
-          local_segments << local_segment
-          segment
-        }
+        str = SegmentString.new(@path, options.delete(:requirements))
 
         # Mark as dynamic only if the first segment is dynamic
-        @dynamic = segments[0] =~ /[\^\/\.\?]/ ? true : false
+        @dynamic = str.dynamic_first_segment?
 
-        @local_recognizer = Regexp.compile("#{local_segments.compact.join("\/")}")
-        @recognizer = Regexp.compile("^/#{segments.compact.join("\/")}$")
+        @recognizer = str.recognizer
+        @local_recognizer = str.local_recognizer
+        @params = str.params
       end
 
       def dynamic?
@@ -53,7 +27,7 @@ module Rack
       end
 
       def key
-        Route.first_segment(@path)
+        SegmentString.first_segment(@path)
       end
 
       def call(env)

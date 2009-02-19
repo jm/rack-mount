@@ -31,7 +31,7 @@ module Rack
       def call(env)
         method = env["REQUEST_METHOD"]
         path = env["PATH_INFO"]
-        @buckets[Route.first_segment(path)].each do |route|
+        @buckets[SegmentString.first_segment(path)].each do |route|
           result = route.call(env)
           return result unless result[0] == 404
         end
