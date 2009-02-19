@@ -6,20 +6,20 @@ class RailsApiTest < Test::Unit::TestCase
 
   Routes = Rack::Mount::RouteSet.new
   Routes.draw do |map|
-    map.connect "people", :app => Tracer.new(EchoApp, :people_index), :conditions => { :method => :get }
-    map.connect "people", :app => Tracer.new(EchoApp, :people_create), :conditions => { :method => :post }
-    map.connect "people/new", :app => Tracer.new(EchoApp, :people_new), :conditions => { :method => :get }
-    map.connect "people/:id/edit", :app => Tracer.new(EchoApp, :people_edit), :conditions => { :method => :get }
-    map.connect "people/:id", :app => Tracer.new(EchoApp, :people_show), :id => /\d+/, :conditions => { :method => :get }
-    map.connect "people/:id", :app => Tracer.new(EchoApp, :people_update), :requirements => { :id => /\d+/ }, :conditions => { :method => :put }
-    map.connect "people/:id", :app => Tracer.new(EchoApp, :people_delete), :requirements => { :id => /\d+/ }, :conditions => { :method => :delete }
+    map.connect "people", :controller => "people", :action => "index", :conditions => { :method => :get }
+    map.connect "people", :controller => "people", :action => "create", :conditions => { :method => :post }
+    map.connect "people/new", :controller => "people", :action => "new", :conditions => { :method => :get }
+    map.connect "people/:id/edit", :controller => "people", :action => "edit", :conditions => { :method => :get }
+    map.connect "people/:id", :controller => "people", :action => "show", :id => /\d+/, :conditions => { :method => :get }
+    map.connect "people/:id", :controller => "people", :action => "update", :requirements => { :id => /\d+/ }, :conditions => { :method => :put }
+    map.connect "people/:id", :controller => "people", :action => "destroy", :requirements => { :id => /\d+/ }, :conditions => { :method => :delete }
 
-    map.connect "foo", :app => Tracer.new(EchoApp, :foo)
-    map.connect "foo/bar", :app => Tracer.new(EchoApp, :foo_bar)
-    map.connect "/baz", :app => Tracer.new(EchoApp, :baz)
+    map.connect "foo", :controller => "foo", :action => "index"
+    map.connect "foo/bar", :controller => "foo_bar", :action => "index"
+    map.connect "/baz", :controller => "baz", :action => "index"
 
-    map.connect "files/*files", :app => Tracer.new(EchoApp, :files)
-    map.connect ":controller/:action/:id", :app => Tracer.new(EchoApp, :default)
+    map.connect "files/*files", :controller => "files", :action => "index"
+    map.connect ":controller/:action/:id"
   end
 
   def setup

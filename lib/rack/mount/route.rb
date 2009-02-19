@@ -11,11 +11,12 @@ module Rack
         @method = method.to_s.upcase if method
 
         @path = options.delete(:path)
-        requirements = options.delete(:requirements)
+        @requirements = options.delete(:requirements).freeze
+        @defaults = options.delete(:defaults).freeze
 
         @segment = @path.is_a?(Regexp) ?
-          SegmentRegexp.new(@path, requirements) :
-          SegmentString.new(@path, requirements)
+          SegmentRegexp.new(@path, @requirements) :
+          SegmentString.new(@path, @requirements)
 
         # Mark as dynamic only if the first segment is dynamic
         @dynamic = @segment.dynamic_first_segment?
@@ -45,9 +46,11 @@ module Rack
             param_matches = Regexp.last_match.captures
             routing_args = {}
             @params.each_with_index { |p,i| routing_args[p] = param_matches[i] }
+          else
+            routing_args = {}
           end
 
-          env["rack.routing_args"] = routing_args
+          env["rack.routing_args"] = routing_args.merge(@defaults)
           @app.call(env)
         else
           SKIP_RESPONSE

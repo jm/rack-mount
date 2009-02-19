@@ -1,6 +1,7 @@
+require 'rubygems'
 require 'rack/mount'
 
-App = lambda { |env|
+FooController = lambda { |env|
   [200, {"Content-Type" => "text/html"}, []]
 }
 
@@ -8,16 +9,16 @@ Map = lambda do |map|
   resources = ("a".."zz")
 
   resources.each do |resouce|
-    map.connect "#{resouce}", :app => App, :conditions => { :method => :get }
-    map.connect "#{resouce}", :app => App, :conditions => { :method => :post }
-    map.connect "#{resouce}/new", :app => App, :conditions => { :method => :get }
-    map.connect "#{resouce}/:id/edit", :app => App, :conditions => { :method => :get }
-    map.connect "#{resouce}/:id", :app => App, :conditions => { :method => :get }
-    map.connect "#{resouce}/:id", :app => App, :conditions => { :method => :put }
-    map.connect "#{resouce}/:id", :app => App, :conditions => { :method => :delete }
+    map.connect "#{resouce}", :controller => "foo", :conditions => { :method => :get }
+    map.connect "#{resouce}", :controller => "foo", :conditions => { :method => :post }
+    map.connect "#{resouce}/new", :controller => "foo", :conditions => { :method => :get }
+    map.connect "#{resouce}/:id/edit", :controller => "foo", :conditions => { :method => :get }
+    map.connect "#{resouce}/:id", :controller => "foo", :conditions => { :method => :get }
+    map.connect "#{resouce}/:id", :controller => "foo", :conditions => { :method => :put }
+    map.connect "#{resouce}/:id", :controller => "foo", :conditions => { :method => :delete }
   end
 
-  map.connect ":controller/:action/:id", :app => App
+  map.connect ":controller/:action/:id"
 end
 
 Env = {

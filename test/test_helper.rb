@@ -1,14 +1,18 @@
+require 'rubygems'
 require 'test/unit'
 require 'yaml'
 
 require 'rack/mount'
 
 require 'basic_recognition_tests'
-require 'tracer'
 
 EchoApp = lambda { |env|
   [200, {"Content-Type" => "text/yaml"}, [YAML.dump(env)]]
 }
+
+def Object.const_missing(name)
+  EchoApp
+end
 
 module TestHelper
   private

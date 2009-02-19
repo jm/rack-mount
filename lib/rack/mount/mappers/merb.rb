@@ -1,3 +1,5 @@
+require 'active_support/inflector'
+
 module Rack
   module Mount
     module Mappers
@@ -59,8 +61,22 @@ module Rack
           self.class.new(@set, @proxy, @conditions.merge(conditions))
         end
 
-        def to(app)
-          behavior = self.class.new(@set, @proxy, @conditions.merge(:app => app))
+        def to(params = {})
+          @conditions[:defaults] = params
+
+          if params.has_key?(:controller)
+            app = ActiveSupport::Inflector.camelize(params[:controller])
+            app = ActiveSupport::Inflector.constantize(app)
+            @conditions[:app] = app
+          else
+            @conditions[:app] = lambda { |env|
+              app = ActiveSupport::Inflector.camelize(env["rack.routing_args"][:controller])
+              app = ActiveSupport::Inflector.constantize(app)
+              app.call(env)
+            }
+          end
+
+          behavior = self.class.new(@set, @proxy, @conditions)
           behavior.to_route
         end
 

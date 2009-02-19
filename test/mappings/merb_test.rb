@@ -6,22 +6,22 @@ class MerbApiTest < Test::Unit::TestCase
 
   Router = Rack::Mount::RouteSet.new
   Router.prepare do
-    match("/people", :method => :get).to(Tracer.new(EchoApp, :people_index))
-    match("/people", :method => :post).to(Tracer.new(EchoApp, :people_create))
-    match("/people/new", :method => :get).to(Tracer.new(EchoApp, :people_new))
-    match("/people/:id/edit", :method => :get).to(Tracer.new(EchoApp, :people_edit))
-    match("/people/:id", :id => /\d+/, :method => :get).to(Tracer.new(EchoApp, :people_show))
-    match("/people/:id", :id => /\d+/, :method => :put).to(Tracer.new(EchoApp, :people_update))
-    match("/people/:id", :id => /\d+/, :method => :delete).to(Tracer.new(EchoApp, :people_delete))
+    match("/people", :method => :get).to(:controller => "people", :action => "index")
+    match("/people", :method => :post).to(:controller => "people", :action => "create")
+    match("/people/new", :method => :get).to(:controller => "people", :action => "new")
+    match("/people/:id/edit", :method => :get).to(:controller => "people", :action => "edit")
+    match("/people/:id", :id => /\d+/, :method => :get).to(:controller => "people", :action => "show")
+    match("/people/:id", :id => /\d+/, :method => :put).to(:controller => "people", :action => "update")
+    match("/people/:id", :id => /\d+/, :method => :delete).to(:controller => "people", :action => "destroy")
 
-    match("foo").to(Tracer.new(EchoApp, :foo))
-    match("foo/bar").to(Tracer.new(EchoApp, :foo_bar))
-    match("/baz").to(Tracer.new(EchoApp, :baz))
+    match("foo").to(:controller => "foo", :action => "index")
+    match("foo/bar").to(:controller => "foo_bar", :action => "index")
+    match("/baz").to(:controller => "baz", :action => "index")
 
-    match(%r{^/regexp/foos?/(bar|baz)/([a-z0-9]+)}, :action => "[1]", :id => "[2]").to(Tracer.new(EchoApp, :regexp))
+    match(%r{^/regexp/foos?/(bar|baz)/([a-z0-9]+)}, :action => "[1]", :id => "[2]").to(:controller => "foo")
 
-    match("files/*files").to(Tracer.new(EchoApp, :files))
-    match(":controller/:action/:id").to(Tracer.new(EchoApp, :default))
+    match("files/*files").to(:controller => "files", :action => "index")
+    match(":controller/:action/:id").to()
   end
 
   def setup
@@ -32,14 +32,12 @@ class MerbApiTest < Test::Unit::TestCase
     get "/regexp/foo/bar/baz"
     assert env
     assert_equal("GET", env["REQUEST_METHOD"])
-    assert_equal({:action => "bar", :id => "baz"}, env["rack.routing_args"])
-    assert_equal(:regexp, env["tracer"])
+    assert_equal({ :controller => "foo", :action => "bar", :id => "baz" }, env["rack.routing_args"])
 
     get "/regexp/foos/bar/baz"
     assert env
     assert_equal("GET", env["REQUEST_METHOD"])
-    assert_equal({:action => "bar", :id => "baz"}, env["rack.routing_args"])
-    assert_equal(:regexp, env["tracer"])
+    assert_equal({ :controller => "foo", :action => "bar", :id => "baz" }, env["rack.routing_args"])
 
     get "/regexp/bars/foo/baz"
     assert_nil env
