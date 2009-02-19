@@ -8,23 +8,29 @@ module Rack
         path.sub(/^\//, "").split("/")[0]
       end
 
-      def initialize(method, string, app)
+      def initialize(options)
+        @app = options.delete(:app)
+        raise ArgumentError unless @app && @app.respond_to?(:call)
+
+        method = options.delete(:method)
         @method = method.to_s.upcase if method
-        @app = app
-        @string = string
-        string.sub!(/^\//, "")
+
+        @path = options.delete(:path)
+        @path.sub!(/^\//, "")
+
+        requirements = options.delete(:requirements) || {}
 
         @params = []
         local_segments = []
 
-        segments = @string.split("/").map! { |segment|
+        segments = @path.split("/").map! { |segment|
           next if segment.empty?
           segment = local_segment = Regexp.escape(segment)
 
           if segment =~ /^:(\w+)$/
             @params << $1.to_sym
-            local_segment = "([^#{SEPARATORS.join}]+)"
-            segment.gsub!(segment, "[^#{SEPARATORS.join}]+")
+            local_segment = "(#{requirements[$1.to_sym] || "[^#{SEPARATORS.join}]+"})"
+            segment.gsub!(segment, "#{requirements[$1.to_sym] || "[^#{SEPARATORS.join}]+"}")
           elsif segment =~ /^\\\*(\w+)$/
             @params << $1.to_sym
             local_segment = "(.*)"
@@ -47,7 +53,7 @@ module Rack
       end
 
       def key
-        Route.first_segment(@string)
+        Route.first_segment(@path)
       end
 
       def call(env)

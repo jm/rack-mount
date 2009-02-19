@@ -17,8 +17,8 @@ module Rack
         freeze
       end
 
-      def add_route(method, path, options = {})
-        route = Route.new(method, path, options[:app])
+      def add_route(options = {})
+        route = Route.new(options)
         @routes << route
         route
       end

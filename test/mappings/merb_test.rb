@@ -10,9 +10,9 @@ class MerbApiTest < Test::Unit::TestCase
     match("/people", :method => :post).to(Tracer.new(EchoApp, :people_create))
     match("/people/new", :method => :get).to(Tracer.new(EchoApp, :people_new))
     match("/people/:id/edit", :method => :get).to(Tracer.new(EchoApp, :people_edit))
-    match("/people/:id", :method => :get).to(Tracer.new(EchoApp, :people_show))
-    match("/people/:id", :method => :put).to(Tracer.new(EchoApp, :people_update))
-    match("/people/:id", :method => :delete).to(Tracer.new(EchoApp, :people_delete))
+    match("/people/:id", :id => /\d+/, :method => :get).to(Tracer.new(EchoApp, :people_show))
+    match("/people/:id", :id => /\d+/, :method => :put).to(Tracer.new(EchoApp, :people_update))
+    match("/people/:id", :id => /\d+/, :method => :delete).to(Tracer.new(EchoApp, :people_delete))
 
     match("foo").to(Tracer.new(EchoApp, :foo))
     match("foo/bar").to(Tracer.new(EchoApp, :foo_bar))

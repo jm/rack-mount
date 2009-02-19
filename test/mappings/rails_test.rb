@@ -10,9 +10,9 @@ class RailsApiTest < Test::Unit::TestCase
     map.connect "people", :app => Tracer.new(EchoApp, :people_create), :conditions => { :method => :post }
     map.connect "people/new", :app => Tracer.new(EchoApp, :people_new), :conditions => { :method => :get }
     map.connect "people/:id/edit", :app => Tracer.new(EchoApp, :people_edit), :conditions => { :method => :get }
-    map.connect "people/:id", :app => Tracer.new(EchoApp, :people_show), :conditions => { :method => :get }
-    map.connect "people/:id", :app => Tracer.new(EchoApp, :people_update), :conditions => { :method => :put }
-    map.connect "people/:id", :app => Tracer.new(EchoApp, :people_delete), :conditions => { :method => :delete }
+    map.connect "people/:id", :app => Tracer.new(EchoApp, :people_show), :id => /\d+/, :conditions => { :method => :get }
+    map.connect "people/:id", :app => Tracer.new(EchoApp, :people_update), :requirements => { :id => /\d+/ }, :conditions => { :method => :put }
+    map.connect "people/:id", :app => Tracer.new(EchoApp, :people_delete), :requirements => { :id => /\d+/ }, :conditions => { :method => :delete }
 
     map.connect "foo", :app => Tracer.new(EchoApp, :foo)
     map.connect "foo/bar", :app => Tracer.new(EchoApp, :foo_bar)

@@ -90,6 +90,26 @@ module BasicRecognitionTests
     assert_equal(:people_edit, env["tracer"])
   end
 
+  def test_requirements
+    get "/people/1"
+    assert env
+    assert_equal("GET", env["REQUEST_METHOD"])
+    assert_equal(:people_show, env["tracer"])
+
+    put "/people/1"
+    assert env
+    assert_equal("PUT", env["REQUEST_METHOD"])
+    assert_equal(:people_update, env["tracer"])
+
+    delete "/people/1"
+    assert env
+    assert_equal("DELETE", env["REQUEST_METHOD"])
+    assert_equal(:people_delete, env["tracer"])
+
+    get "/people/foo"
+    assert_nil env
+  end
+
   def test_path_with_globbing
     get "/files/images/photo.jpg"
     assert env

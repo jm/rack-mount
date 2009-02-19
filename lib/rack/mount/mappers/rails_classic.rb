@@ -7,11 +7,20 @@ module Rack
         end
 
         def connect(path, options = {})
+          options[:path] = path
+
           if conditions = options.delete(:conditions)
-            method = conditions.delete(:method)
+            options[:method] = conditions.delete(:method)
           end
 
-          @set.add_route(method, path, options)
+          requirements = options[:requirements] ||= {}
+          options.each do |k, v|
+            if v.is_a?(Regexp)
+              requirements[k.to_sym] = options.delete(k)
+            end
+          end
+
+          @set.add_route(options)
         end
       end
     end

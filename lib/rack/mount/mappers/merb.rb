@@ -45,9 +45,17 @@ module Rack
           @conditions = conditions
         end
 
-        def match(path, options = {})
-          method = options.delete(:method)
-          self.class.new(@set, @proxy, @conditions.merge(:path => path, :method => method))
+        def match(path, conditions = {})
+          conditions[:path] = path
+
+          requirements = conditions[:requirements] ||= {}
+          conditions.each do |k, v|
+            if v.is_a?(Regexp)
+              requirements[k.to_sym] = conditions.delete(k)
+            end
+          end
+
+          self.class.new(@set, @proxy, @conditions.merge(conditions))
         end
 
         def to(app)
@@ -57,9 +65,7 @@ module Rack
 
         protected
           def to_route
-            method = @conditions.delete(:method)
-            path = @conditions.delete(:path)
-            @set.add_route(method, path, @conditions)
+            @set.add_route(@conditions)
           end
       end
     end
