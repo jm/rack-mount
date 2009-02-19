@@ -46,14 +46,15 @@ module Rack
         end
 
         def match(path, conditions = {})
-          conditions[:path] = path
-
-          requirements = conditions[:requirements] ||= {}
+          requirements = {}
           conditions.each do |k, v|
-            if v.is_a?(Regexp)
+            if v.is_a?(Regexp) || path.is_a?(Regexp)
               requirements[k.to_sym] = conditions.delete(k)
             end
           end
+
+          conditions[:requirements] = requirements
+          conditions[:path] = path
 
           self.class.new(@set, @proxy, @conditions.merge(conditions))
         end

@@ -11,15 +11,17 @@ module Rack
         @method = method.to_s.upcase if method
 
         @path = options.delete(:path)
+        requirements = options.delete(:requirements)
 
-        str = SegmentString.new(@path, options.delete(:requirements))
+        @segment = @path.is_a?(Regexp) ?
+          SegmentRegexp.new(@path, requirements) :
+          SegmentString.new(@path, requirements)
 
         # Mark as dynamic only if the first segment is dynamic
-        @dynamic = str.dynamic_first_segment?
+        @dynamic = @segment.dynamic_first_segment?
 
-        @recognizer = str.recognizer
-        @local_recognizer = str.local_recognizer
-        @params = str.params
+        @recognizer = @segment.recognizer
+        @params = @segment.params
       end
 
       def dynamic?
@@ -35,9 +37,15 @@ module Rack
         path = env["PATH_INFO"]
 
         if (@method.nil? || method == @method) && path =~ @recognizer
-          param_matches = path.scan(@local_recognizer).flatten
-          routing_args = {}
-          @params.each_with_index { |p,i| routing_args[p] = param_matches[i] }
+          if @segment.is_a?(SegmentString)
+            param_matches = path.scan(@segment.local_recognizer).flatten
+            routing_args = {}
+            @params.each_with_index { |p,i| routing_args[p] = param_matches[i] }
+          elsif @segment.is_a?(SegmentRegexp)
+            param_matches = Regexp.last_match.captures
+            routing_args = {}
+            @params.each_with_index { |p,i| routing_args[p] = param_matches[i] }
+          end
 
           env["rack.routing_args"] = routing_args
           @app.call(env)

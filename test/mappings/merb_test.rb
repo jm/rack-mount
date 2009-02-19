@@ -18,11 +18,30 @@ class MerbApiTest < Test::Unit::TestCase
     match("foo/bar").to(Tracer.new(EchoApp, :foo_bar))
     match("/baz").to(Tracer.new(EchoApp, :baz))
 
+    match(%r{^/regexp/foos?/(bar|baz)/([a-z0-9]+)}, :action => "[1]", :id => "[2]").to(Tracer.new(EchoApp, :regexp))
+
     match("files/*files").to(Tracer.new(EchoApp, :files))
     match(":controller/:action/:id").to(Tracer.new(EchoApp, :default))
   end
 
   def setup
     @app = Router
+  end
+
+  def test_regexp
+    get "/regexp/foo/bar/baz"
+    assert env
+    assert_equal("GET", env["REQUEST_METHOD"])
+    assert_equal({:action => "bar", :id => "baz"}, env["rack.routing_args"])
+    assert_equal(:regexp, env["tracer"])
+
+    get "/regexp/foos/bar/baz"
+    assert env
+    assert_equal("GET", env["REQUEST_METHOD"])
+    assert_equal({:action => "bar", :id => "baz"}, env["rack.routing_args"])
+    assert_equal(:regexp, env["tracer"])
+
+    get "/regexp/bars/foo/baz"
+    assert_nil env
   end
 end
