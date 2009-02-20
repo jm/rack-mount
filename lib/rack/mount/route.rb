@@ -2,6 +2,9 @@ module Rack
   module Mount
     class Route
       SKIP_RESPONSE = [404, {"Content-Type" => "text/html"}, "Not Found"]
+      HTTP_METHODS = ["GET", "HEAD", "POST", "PUT", "DELETE"]
+
+      attr_reader :path, :method
 
       def initialize(options)
         @app = options.delete(:app)
@@ -28,8 +31,8 @@ module Rack
         @dynamic
       end
 
-      def key
-        SegmentString.first_segment(@path)
+      def methods
+        Array(@method || HTTP_METHODS)
       end
 
       def call(env)

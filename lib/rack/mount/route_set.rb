@@ -31,7 +31,9 @@ module Rack
       def call(env)
         method = env["REQUEST_METHOD"]
         path = env["PATH_INFO"]
-        @buckets[SegmentString.first_segment(path)].each do |route|
+
+        key = "#{method}#{path.slice(SegmentString::FIRST_SEGMENT_REGEXP)}"
+        @buckets[key].each do |route|
           result = route.call(env)
           return result unless result[0] == 404
         end
@@ -53,7 +55,10 @@ module Rack
             if route.dynamic?
               bucket << route
             else
-              bucket[route.key] = route
+              route.methods.each do |method|
+                key = "#{method}#{route.path.slice(SegmentString::FIRST_SEGMENT_REGEXP)}"
+                bucket[key] = route
+              end
             end
           end
           bucket.freeze

@@ -7,10 +7,6 @@ module Rack
       SEGMENT_REGEXP = /[^\/\.\?]+|[\/\.\?]/
       FIRST_SEGMENT_REGEXP = /[^\/]+/
 
-      def self.first_segment(path)
-        path.slice(FIRST_SEGMENT_REGEXP)
-      end
-
       def initialize(str, requirements = {})
         raise ArgumentError unless str.is_a?(String)
         str = str.dup
