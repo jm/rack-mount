@@ -47,6 +47,13 @@ module BasicRecognitionTests
     assert_equal({ :controller => "people", :action => "new" }, env["rack.routing_args"])
   end
 
+  def test_root_path
+    get "/"
+    assert env
+    assert_equal("GET", env["REQUEST_METHOD"])
+    assert_equal({ :controller => "homepage" }, env["rack.routing_args"])
+  end
+
   def test_extracts_parameters
     get "/foo/bar/1"
     assert env

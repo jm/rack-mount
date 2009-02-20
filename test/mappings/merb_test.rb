@@ -14,6 +14,8 @@ class MerbApiTest < Test::Unit::TestCase
     match("/people/:id", :id => /\d+/, :method => :put).to(:controller => "people", :action => "update")
     match("/people/:id", :id => /\d+/, :method => :delete).to(:controller => "people", :action => "destroy")
 
+    match("").to(:controller => "homepage")
+
     match("foo").to(:controller => "foo", :action => "index")
     match("foo/bar").to(:controller => "foo_bar", :action => "index")
     match("/baz").to(:controller => "baz", :action => "index")

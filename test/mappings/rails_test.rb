@@ -14,6 +14,8 @@ class RailsApiTest < Test::Unit::TestCase
     map.connect "people/:id", :controller => "people", :action => "update", :requirements => { :id => /\d+/ }, :conditions => { :method => :put }
     map.connect "people/:id", :controller => "people", :action => "destroy", :requirements => { :id => /\d+/ }, :conditions => { :method => :delete }
 
+    map.connect '', :controller => 'homepage'
+
     map.connect "foo", :controller => "foo", :action => "index"
     map.connect "foo/bar", :controller => "foo_bar", :action => "index"
     map.connect "/baz", :controller => "baz", :action => "index"
