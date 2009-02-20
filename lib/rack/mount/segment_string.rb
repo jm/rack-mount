@@ -5,9 +5,10 @@ module Rack
       PARAM_REGEXP = /^:(\w+)$/
       GLOB_REGEXP  = /^\\\*(\w+)$/
       SEGMENT_REGEXP = /[^\/\.\?]+|[\/\.\?]/
+      FIRST_SEGMENT_REGEXP = /[^\/]+/
 
       def self.first_segment(path)
-        path.sub(/^\//, "").split("/")[0]
+        path.slice(FIRST_SEGMENT_REGEXP)
       end
 
       def initialize(str, requirements = {})
