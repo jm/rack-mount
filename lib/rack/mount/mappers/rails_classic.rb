@@ -43,6 +43,11 @@ module Rack
 
           @set.add_route(new_options)
         end
+
+        def method_missing(route_name, *args, &block) #:nodoc:
+          super unless args.length >= 1 && block.nil?
+          connect(*args)
+        end
       end
     end
   end

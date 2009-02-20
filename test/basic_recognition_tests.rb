@@ -110,6 +110,18 @@ module BasicRecognitionTests
     assert_nil env
   end
 
+  def test_regexp_and_parameters
+    get "/geocode/60614"
+    assert env
+    assert_equal("GET", env["REQUEST_METHOD"])
+    assert_equal({ :controller => "geocode", :action => "show", :postalcode => "60614" }, env["rack.routing_args"])
+
+    get "/geocode2/60614"
+    assert env
+    assert_equal("GET", env["REQUEST_METHOD"])
+    assert_equal({ :controller => "geocode", :action => "show", :postalcode => "60614" }, env["rack.routing_args"])
+  end
+
   def test_path_with_globbing
     get "/files/images/photo.jpg"
     assert env

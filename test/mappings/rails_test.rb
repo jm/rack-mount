@@ -16,6 +16,11 @@ class RailsApiTest < Test::Unit::TestCase
 
     map.connect '', :controller => 'homepage'
 
+    map.geocode 'geocode/:postalcode', :controller => 'geocode',
+                 :action => 'show', :postalcode => /\d{5}(-\d{4})?/
+    map.geocode2 'geocode2/:postalcode', :controller => 'geocode',
+                 :action => 'show', :requirements => { :postalcode => /\d{5}(-\d{4})?/ }
+
     map.connect "foo", :controller => "foo", :action => "index"
     map.connect "foo/bar", :controller => "foo_bar", :action => "index"
     map.connect "/baz", :controller => "baz", :action => "index"

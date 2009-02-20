@@ -16,6 +16,9 @@ class MerbApiTest < Test::Unit::TestCase
 
     match("").to(:controller => "homepage")
 
+    match("geocode/:postalcode", :postalcode => /\d{5}(-\d{4})?/).to(:controller => "geocode", :action => "show")
+    match("geocode2/:postalcode", :postalcode => /\d{5}(-\d{4})?/).to(:controller => "geocode", :action => "show")
+
     match("foo").to(:controller => "foo", :action => "index")
     match("foo/bar").to(:controller => "foo_bar", :action => "index")
     match("/baz").to(:controller => "baz", :action => "index")
