@@ -10,6 +10,12 @@ module Rack
         freeze
       end
 
+      def new_draw(&block)
+        mapper = Mappers::RailsDraft.new(self)
+        mapper.instance_eval(&block)
+        freeze
+      end
+
       def prepare(&block)
         proxy = Mappers::Merb::Proxy.new
         proxy.push(Mappers::Merb.new(self, proxy))

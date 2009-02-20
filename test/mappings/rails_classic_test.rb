@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class RailsApiTest < Test::Unit::TestCase
+class RailsClassicApiTest < Test::Unit::TestCase
   include TestHelper
   include BasicRecognitionTests
 
