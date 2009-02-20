@@ -4,6 +4,7 @@ module Rack
       SEPARATORS   = %w( / . ? )
       PARAM_REGEXP = /^:(\w+)$/
       GLOB_REGEXP  = /^\\\*(\w+)$/
+      SEGMENT_REGEXP = /[^\/\.\?]+|[\/\.\?]/
 
       def self.first_segment(path)
         path.sub(/^\//, "").split("/")[0]
@@ -18,11 +19,11 @@ module Rack
       end
 
       def dynamic_first_segment?
-        segments[0] =~ PARAM_REGEXP ? true : false
+        segments[1] =~ PARAM_REGEXP ? true : false
       end
 
       def segments
-        @segments ||= split("/").map! { |segment|
+        @segments ||= scan(SEGMENT_REGEXP).map! { |segment|
           next if segment == ""
           Regexp.escape(segment)
         }.compact
@@ -32,29 +33,14 @@ module Rack
         @recognizer ||= begin
           re = segments.map { |segment|
             if segment =~ PARAM_REGEXP
-              "#{@requirements[$1.to_sym] || "[^#{SEPARATORS.join}]+"}"
-            elsif segment =~ GLOB_REGEXP
-              ".*"
-            else
-              segment
-            end
-          }.compact.join("\/")
-          Regexp.compile("^/#{re}$")
-        end
-      end
-
-      def local_recognizer
-        @local_recognizer ||= begin
-          re = segments.map { |segment|
-            if segment =~ PARAM_REGEXP
               "(#{@requirements[$1.to_sym] || "[^#{SEPARATORS.join}]+"})"
             elsif segment =~ GLOB_REGEXP
               "(.*)"
             else
               segment
             end
-          }.compact.join("\/")
-          Regexp.compile("#{re}")
+          }.compact.join
+          Regexp.compile("^#{re}$")
         end
       end
 
@@ -73,7 +59,6 @@ module Rack
       def freeze
         segments
         recognizer
-        local_recognizer
         params
 
         super
@@ -81,7 +66,7 @@ module Rack
 
       private
         def prepand_slash!(str)
-          str.replace("/#{str}") if str =~ /^\//
+          str.replace("/#{str}") unless str =~ /^\//
         end
     end
   end

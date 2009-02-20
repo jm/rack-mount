@@ -24,6 +24,7 @@ class MerbApiTest < Test::Unit::TestCase
 
     match("files/*files").to(:controller => "files", :action => "index")
     match(":controller/:action/:id").to()
+    match(":controller/:action/:id.:format").to()
   end
 
   def setup

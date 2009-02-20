@@ -20,7 +20,6 @@ module Rack
 
         # Mark as dynamic only if the first segment is dynamic
         @dynamic = @segment.dynamic_first_segment?
-
         @recognizer = @segment.recognizer
         @params = @segment.params
       end
@@ -38,19 +37,9 @@ module Rack
         path = env["PATH_INFO"]
 
         if (@method.nil? || method == @method) && path =~ @recognizer
-          if @segment.is_a?(SegmentString)
-            param_matches = path.scan(@segment.local_recognizer).flatten
-            routing_args = {}
-            @params.each_with_index { |p,i| routing_args[p] = param_matches[i] }
-          elsif @segment.is_a?(SegmentRegexp)
-            param_matches = Regexp.last_match.captures
-            routing_args = {}
-            @params.each_with_index { |p,i| routing_args[p] = param_matches[i] }
-          else
-            routing_args = {}
-          end
-
-          env["rack.routing_args"] = routing_args.merge(@defaults)
+          routing_args, param_matches = {}, $~.captures
+          @params.each_with_index { |p,i| routing_args[p] = param_matches[i] }
+          env["rack.routing_args"] = routing_args.merge!(@defaults)
           @app.call(env)
         else
           SKIP_RESPONSE

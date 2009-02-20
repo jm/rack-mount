@@ -60,6 +60,12 @@ module BasicRecognitionTests
     assert_equal("GET", env["REQUEST_METHOD"])
     assert_equal({ :controller => "foo", :action => "bar", :id => "1" },
       env["rack.routing_args"])
+
+    get "/foo/bar/1.xml"
+    assert env
+    assert_equal("GET", env["REQUEST_METHOD"])
+    assert_equal({ :controller => "foo", :action => "bar", :id => "1", :format => "xml" },
+      env["rack.routing_args"])
   end
 
   def test_extracts_id
