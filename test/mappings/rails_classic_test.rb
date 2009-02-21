@@ -34,11 +34,4 @@ class RailsClassicApiTest < Test::Unit::TestCase
   def setup
     @app = Routes
   end
-
-  def test_worst_case
-    # Make sure we aren't making the tree less efficient. Its okay if
-    # this number gets smaller. However it may increase if the more
-    # routes are added to the test fixture.
-    assert_equal 6, Routes.worst_case
-  end
 end

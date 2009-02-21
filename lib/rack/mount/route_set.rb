@@ -35,23 +35,25 @@ module Rack
       end
 
       def call(env)
+        Thread.current[:result] = nil
+
         method = env["REQUEST_METHOD"]
         path = env["PATH_INFO"]
 
-        key = "#{method}#{path.slice(SegmentString::FIRST_SEGMENT_REGEXP)}"
-        @buckets[key].each do |route|
-          result = route.call(env)
-          return result unless result[0] == 404
+        key = Request.new(env)
+        @buckets[key]
+
+        if result = Thread.current[:result]
+          return result
+        else
+          nil
         end
-        nil
+      ensure
+        Thread.current[:result] = nil
       end
 
       def size
         @routes.length
-      end
-
-      def worst_case
-        @buckets.values.max { |a, b| a.length <=> b.length }.length
       end
 
       private
@@ -59,10 +61,10 @@ module Rack
           bucket = Bucket.new
           @routes.each do |route|
             if route.dynamic?
-              bucket << route
+              bucket[nil] = route
             else
               route.methods.each do |method|
-                key = "#{method}#{route.path.slice(SegmentString::FIRST_SEGMENT_REGEXP)}"
+                key = "#{method} /#{route.path.slice(SegmentString::FIRST_SEGMENT_REGEXP)}"
                 bucket[key] = route
               end
             end
