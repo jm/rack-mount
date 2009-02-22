@@ -1,89 +1,86 @@
 require 'active_support/inflector'
+require 'merb-core/dispatch/router/behavior'
 
 module Rack
   module Mount
     module Mappers
       class Merb
-        class Proxy
-          def initialize
-            @behaviors = []
-          end
+        class ::Merb::Router::Behavior
+          def to_route
+            raise Error, "The route has already been committed." if @route
 
-          def push(behavior)
-            @behaviors.push(behavior)
-          end
+            controller = @params[:controller]
 
-          def pop
-            @behaviors.pop
-          end
+            if prefixes = @options[:controller_prefix]
+              controller ||= ":controller"
 
-          def respond_to?(*args)
-            super || @behaviors.last.respond_to?(*args)
-          end
-
-          %w(match to).each do |method|
-            class_eval %{
-              def #{method}(*args, &block)
-                @behaviors.last.#{method}(*args, &block)
-              end
-            }
-          end
-
-          private
-            def method_missing(method, *args, &block)
-              behavior = @behaviors.last
-
-              if behavior.respond_to?(method)
-                behavior.send(method, *args, &block)
-              else
-                super
+              prefixes.reverse_each do |prefix|
+                break if controller =~ %r{^/(.*)} && controller = $1
+                controller = "#{prefix}/#{controller}"
               end
             end
+
+            @params.merge!(:controller => controller.to_s.gsub(%r{^/}, '')) if controller
+
+            identifiers = @identifiers.sort { |(first,_),(sec,_)| first <=> sec || 1 }
+
+            Thread.current[:merb_routes] << [
+              @conditions.dup,
+              @params,
+              @blocks,
+              { :defaults => @defaults.dup, :identifiers => identifiers }
+            ]
+
+            self
+          end
         end
 
-        def initialize(set, proxy = nil, conditions = {})
+        attr_accessor :root_behavior
+
+        def initialize(set)
           @set = set
-          @proxy = proxy
-          @conditions = conditions
+          @root_behavior = ::Merb::Router::Behavior.new.defaults(:action => "index")
         end
 
-        def match(path, conditions = {})
+        def prepare(first = [], last = [], &block)
+          Thread.current[:merb_routes] = []
+          root_behavior._with_proxy(&block)
+          routes = Thread.current[:merb_routes]
+          routes.each { |route| add_route(*route) }
+          self
+        ensure
+          Thread.current[:merb_routes] = nil
+        end
+
+        def add_route(conditions, params, deferred_procs, options = {})
+          new_options = {}
+          new_options[:path] = conditions.delete(:path)[0]
+          new_options[:method] = conditions.delete(:method)
+
           requirements = {}
           conditions.each do |k, v|
-            if v.is_a?(Regexp) || path.is_a?(Regexp)
+            if v.is_a?(Regexp) || new_options[:path].is_a?(Regexp)
               requirements[k.to_sym] = conditions.delete(k)
             end
           end
 
-          conditions[:requirements] = requirements
-          conditions[:path] = path
-
-          self.class.new(@set, @proxy, @conditions.merge(conditions))
-        end
-
-        def to(params = {})
-          @conditions[:defaults] = params
+          new_options[:requirements] = requirements
+          new_options[:defaults] = params
 
           if params.has_key?(:controller)
             app = ActiveSupport::Inflector.camelize(params[:controller])
             app = ActiveSupport::Inflector.constantize(app)
-            @conditions[:app] = app
+            new_options[:app] = app
           else
-            @conditions[:app] = lambda { |env|
+            new_options[:app] = lambda { |env|
               app = ActiveSupport::Inflector.camelize(env["rack.routing_args"][:controller])
               app = ActiveSupport::Inflector.constantize(app)
               app.call(env)
             }
           end
 
-          behavior = self.class.new(@set, @proxy, @conditions)
-          behavior.to_route
+          @set.add_route(new_options)
         end
-
-        protected
-          def to_route
-            @set.add_route(@conditions)
-          end
       end
     end
   end

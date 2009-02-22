@@ -35,15 +35,15 @@ class MerbApiTest < Test::Unit::TestCase
   end
 
   def test_regexp
-    get "/regexp/foo/bar/baz"
+    get "/regexp/foo/bar/123"
     assert env
     assert_equal("GET", env["REQUEST_METHOD"])
-    assert_equal({ :controller => "foo", :action => "bar", :id => "baz" }, env["rack.routing_args"])
+    assert_equal({ :controller => "foo", :action => "bar", :id => "123" }, env["rack.routing_args"])
 
-    get "/regexp/foos/bar/baz"
+    get "/regexp/foos/baz/123"
     assert env
     assert_equal("GET", env["REQUEST_METHOD"])
-    assert_equal({ :controller => "foo", :action => "bar", :id => "baz" }, env["rack.routing_args"])
+    assert_equal({ :controller => "foo", :action => "baz", :id => "123" }, env["rack.routing_args"])
 
     get "/regexp/bars/foo/baz"
     assert_nil env
