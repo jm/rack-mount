@@ -6,13 +6,7 @@ class RailsClassicApiTest < Test::Unit::TestCase
 
   Routes = Rack::Mount::RouteSet.new
   Routes.draw do |map|
-    map.connect "people", :controller => "people", :action => "index", :conditions => { :method => :get }
-    map.connect "people", :controller => "people", :action => "create", :conditions => { :method => :post }
-    map.connect "people/new", :controller => "people", :action => "new", :conditions => { :method => :get }
-    map.connect "people/:id/edit", :controller => "people", :action => "edit", :conditions => { :method => :get }
-    map.connect "people/:id", :controller => "people", :action => "show", :id => /\d+/, :conditions => { :method => :get }
-    map.connect "people/:id", :controller => "people", :action => "update", :requirements => { :id => /\d+/ }, :conditions => { :method => :put }
-    map.connect "people/:id", :controller => "people", :action => "destroy", :requirements => { :id => /\d+/ }, :conditions => { :method => :delete }
+    map.resources :people
 
     map.connect '', :controller => 'homepage'
 
@@ -39,6 +33,6 @@ class RailsClassicApiTest < Test::Unit::TestCase
     # Make sure we aren't making the tree less efficient. Its okay if
     # this number gets smaller. However it may increase if the more
     # routes are added to the test fixture.
-    assert_equal 6, Routes.worst_case
+    assert_equal 11, Routes.worst_case
   end
 end

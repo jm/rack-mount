@@ -1,14 +1,20 @@
-require 'active_support/inflector'
-
 module Rack
   module Mount
     module Mappers
       class RailsClassic
+        attr_reader :named_routes
+
         def initialize(set)
           @set = set
+          @named_routes = {}
         end
 
-        def connect(path, options = {})
+        def draw(&block)
+          require 'action_controller'
+          yield ActionController::Routing::RouteSet::Mapper.new(self)
+        end
+
+        def add_route(path, options = {})
           new_options = {}
           new_options[:path] = path
 
@@ -44,9 +50,8 @@ module Rack
           @set.add_route(new_options)
         end
 
-        def method_missing(route_name, *args, &block) #:nodoc:
-          super unless args.length >= 1 && block.nil?
-          connect(*args)
+        def add_named_route(name, path, options = {})
+          add_route(path, options)
         end
       end
     end

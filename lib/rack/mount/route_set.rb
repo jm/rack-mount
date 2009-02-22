@@ -1,8 +1,8 @@
 module Rack
   module Mount
     class RouteSet < Bucket
-      def draw
-        yield Mappers::RailsClassic.new(self)
+      def draw(&block)
+        Mappers::RailsClassic.new(self).draw(&block)
         freeze
       end
 

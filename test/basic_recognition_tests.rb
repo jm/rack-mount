@@ -91,26 +91,6 @@ module BasicRecognitionTests
   end
 
   def test_requirements
-    get "/people/1"
-    assert env
-    assert_equal("GET", env["REQUEST_METHOD"])
-    assert_equal({ :controller => "people", :action => "show", :id => "1" }, env["rack.routing_args"])
-
-    put "/people/1"
-    assert env
-    assert_equal("PUT", env["REQUEST_METHOD"])
-    assert_equal({ :controller => "people", :action => "update", :id => "1" }, env["rack.routing_args"])
-
-    delete "/people/1"
-    assert env
-    assert_equal("DELETE", env["REQUEST_METHOD"])
-    assert_equal({ :controller => "people", :action => "destroy", :id => "1" }, env["rack.routing_args"])
-
-    get "/people/foo"
-    assert_nil env
-  end
-
-  def test_regexp_and_parameters
     get "/geocode/60614"
     assert env
     assert_equal("GET", env["REQUEST_METHOD"])
