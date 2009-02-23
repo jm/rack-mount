@@ -1,6 +1,8 @@
 module Rack
   module Mount
     class RouteSet < Bucket
+      include GarbageCompactor
+
       def draw(&block)
         Mappers::RailsClassic.new(self).draw(&block)
         freeze
@@ -42,6 +44,11 @@ module Rack
           return result unless result[0] == 404
         end
         nil
+      end
+
+      def freeze
+        compact!
+        super
       end
 
       def worst_case
