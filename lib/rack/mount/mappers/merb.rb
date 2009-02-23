@@ -1,5 +1,6 @@
+require 'rack'
 require 'active_support/inflector'
-require 'merb-core/dispatch/router/behavior'
+require 'merb-core/dispatch/router'
 
 module Rack
   module Mount
@@ -32,6 +33,25 @@ module Rack
             ]
 
             self
+          end
+        end
+
+        class DeferredProc
+          def initialize(app, deferred_procs)
+            @app, @proc = app, deferred_procs.cache
+          end
+
+          def call(env)
+            # TODO: Change this to a Merb request
+            request = Rack::Request.new(env)
+            params  = env["rack.routing_args"]
+            result  = @proc.call(request, params)
+
+            if result
+              @app.call(env)
+            else
+              Route::SKIP_RESPONSE
+            end
           end
         end
 
@@ -77,6 +97,10 @@ module Rack
               app = ActiveSupport::Inflector.constantize(app)
               app.call(env)
             }
+          end
+
+          if deferred_procs.any?
+            new_options[:app] = DeferredProc.new(new_options[:app], deferred_procs.first)
           end
 
           @set.add_route(new_options)

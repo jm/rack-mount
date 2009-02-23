@@ -25,6 +25,14 @@ class MerbApiTest < Test::Unit::TestCase
 
     match(%r{^/regexp/foos?/(bar|baz)/([a-z0-9]+)}, :action => "[1]", :id => "[2]").to(:controller => "foo")
 
+    match("defer").defer_to do |request, params|
+      params[:controller] = "defer"
+    end
+
+    match("defer_no_match").defer_to do |request, params|
+      false
+    end
+
     match("files/*files").to(:controller => "files", :action => "index")
     match(":controller/:action/:id").to()
     match(":controller/:action/:id.:format").to()
@@ -46,6 +54,16 @@ class MerbApiTest < Test::Unit::TestCase
     assert_equal({ :controller => "foo", :action => "baz", :id => "123" }, env["rack.routing_args"])
 
     get "/regexp/bars/foo/baz"
+    assert_nil env
+  end
+
+  def test_defer
+    get "/defer"
+    assert env
+    assert_equal("GET", env["REQUEST_METHOD"])
+    assert_equal({ :controller => "defer" }, env["rack.routing_args"])
+
+    get "/defer_no_match"
     assert_nil env
   end
 end
