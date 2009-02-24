@@ -15,11 +15,8 @@ module Rack
         end
 
         def add_route(path, options = {})
-          new_options = {}
-          new_options[:path] = path
-
           if conditions = options.delete(:conditions)
-            new_options[:method] = conditions.delete(:method)
+            method = conditions.delete(:method)
           end
 
           requirements = options.delete(:requirements) || {}
@@ -32,22 +29,24 @@ module Rack
             end
           end
 
-          new_options[:requirements] = requirements
-          new_options[:defaults] = defaults
-
-          if new_options[:defaults].has_key?(:controller)
-            app = "#{new_options[:defaults][:controller].camelize}Controller"
+          if defaults.has_key?(:controller)
+            app = "#{defaults[:controller].camelize}Controller"
             app = ActiveSupport::Inflector.constantize(app)
-            new_options[:app] = app
           else
-            new_options[:app] = lambda { |env|
+            app = lambda { |env|
               app = "#{env["rack.routing_args"][:controller].camelize}Controller"
               app = ActiveSupport::Inflector.constantize(app)
               app.call(env)
             }
           end
 
-          @set.add_route(new_options)
+          @set.add_route({
+            :app => app,
+            :path => path,
+            :method => method,
+            :requirements => requirements,
+            :defaults => defaults
+          })
         end
 
         def add_named_route(name, path, options = {})

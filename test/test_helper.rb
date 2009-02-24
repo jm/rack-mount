@@ -10,6 +10,9 @@ EchoApp = lambda { |env|
   [200, {"Content-Type" => "text/yaml"}, [YAML.dump(env)]]
 }
 
+module Admin
+end
+
 def Object.const_missing(name)
   if name.to_s =~ /Controller$/
     EchoApp
