@@ -17,14 +17,14 @@ module Rack
         @requirements = options.delete(:requirements).freeze
         @defaults = options.delete(:defaults).freeze
 
-        @segment = @path.is_a?(Regexp) ?
+        segment = @path.is_a?(Regexp) ?
           SegmentRegexp.new(@path, @requirements) :
           SegmentString.new(@path, @requirements)
 
         # Mark as dynamic only if the first segment is dynamic
-        @dynamic = @segment.dynamic_first_segment?
-        @recognizer = @segment.recognizer
-        @params = @segment.params
+        @dynamic = segment.dynamic_first_segment?
+        @recognizer = segment.recognizer
+        @params = segment.params
       end
 
       def dynamic?
