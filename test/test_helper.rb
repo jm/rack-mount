@@ -11,7 +11,11 @@ EchoApp = lambda { |env|
 }
 
 def Object.const_missing(name)
-  EchoApp
+  if name.to_s =~ /Controller$/
+    EchoApp
+  else
+    super
+  end
 end
 
 module TestHelper

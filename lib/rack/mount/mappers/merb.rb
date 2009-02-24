@@ -88,12 +88,12 @@ module Rack
           new_options[:defaults] = params
 
           if params.has_key?(:controller)
-            app = ActiveSupport::Inflector.camelize(params[:controller])
+            app = ActiveSupport::Inflector.camelize("#{params[:controller]}Controller")
             app = ActiveSupport::Inflector.constantize(app)
             new_options[:app] = app
           else
             new_options[:app] = lambda { |env|
-              app = ActiveSupport::Inflector.camelize(env["rack.routing_args"][:controller])
+              app = ActiveSupport::Inflector.camelize("#{env["rack.routing_args"][:controller]}Controller")
               app = ActiveSupport::Inflector.constantize(app)
               app.call(env)
             }
