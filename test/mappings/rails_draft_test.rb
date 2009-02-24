@@ -6,13 +6,7 @@ class RailsDraftApiTest < Test::Unit::TestCase
 
   Routes = Rack::Mount::RouteSet.new
   Routes.new_draw do |map|
-    get    'people', :to => 'people#index'
-    post   'people', :to => 'people#create'
-    get    'people/new', :to => 'people#new'
-    get    'people/:id/edit', :to => 'people#edit', :constraints => { :id => /\d+/ }
-    get    'people/:id', :to => 'people#show', :constraints => { :id => /\d+/ }
-    put    'people/:id', :to => 'people#update', :constraints => { :id => /\d+/ }
-    delete 'people/:id', :to => 'people#destroy', :constraints => { :id => /\d+/ }
+    resources :people
 
     match '', :to => 'homepage'
 

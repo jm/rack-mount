@@ -5,6 +5,7 @@ module Rack
     module Mappers
       class RailsDraft
         def initialize(set)
+          require 'action_controller'
           @set = set
         end
 
@@ -26,31 +27,53 @@ module Rack
 
         def match(path, options = {})
           new_options = {}
-          new_options[:path] = path
-          new_options[:method] = options.delete(:method)
-          new_options[:requirements] = options.delete(:constraints) || {}
-          new_options[:defaults] = {}
+          method = options.delete(:method)
+          requirements = options.delete(:constraints) || {}
+          defaults = {}
 
           if to = options.delete(:to)
             controller, action = to.split("#")
-            new_options[:defaults][:controller] = controller if controller
-            new_options[:defaults][:action] = action if action
+            defaults[:controller] = controller if controller
+            defaults[:action] = action if action
           end
 
-          if new_options[:defaults].has_key?(:controller)
-            app = "#{new_options[:defaults][:controller].camelize}Controller"
+          if defaults.has_key?(:controller)
+            app = "#{defaults[:controller].camelize}Controller"
             app = ActiveSupport::Inflector.constantize(app)
-            new_options[:app] = app
           else
-            new_options[:app] = lambda { |env|
+            app = lambda { |env|
               app = "#{env["rack.routing_args"][:controller].camelize}Controller"
               app = ActiveSupport::Inflector.constantize(app)
               app.call(env)
             }
           end
 
-          @set.add_route(new_options)
+          @set.add_route({
+            :app => app,
+            :path => path,
+            :method => method,
+            :requirements => requirements,
+            :defaults => defaults
+          })
         end
+
+        def resources(*entities, &block)
+          options = entities.extract_options!
+          entities.each { |entity| map_resource(entity, options.dup, &block) }
+        end
+
+        private
+          def map_resource(entities, options = {}, &block)
+            resource = ActionController::Resources::Resource.new(entities, options)
+
+            get(resource.path, :to => "#{resource.controller}#index")
+            post(resource.path, :to => "#{resource.controller}#create")
+            get(resource.new_path, :to => "#{resource.controller}#new")
+            get("#{resource.member_path}/edit", :to => "#{resource.controller}#edit")
+            get(resource.member_path, :to => "#{resource.controller}#show")
+            put(resource.member_path, :to => "#{resource.controller}#update")
+            delete(resource.member_path, :to => "#{resource.controller}#destroy")
+          end
       end
     end
   end
