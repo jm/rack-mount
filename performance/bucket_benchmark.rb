@@ -5,17 +5,19 @@ FooController = lambda { |env|
   [200, {"Content-Type" => "text/html"}, []]
 }
 
+def Object.const_missing(name)
+  if name.to_s =~ /Controller$/
+    FooController
+  else
+    super
+  end
+end
+
 Map = lambda do |map|
   resources = ("a".."zz")
 
-  resources.each do |resouce|
-    map.connect "#{resouce}", :controller => "foo", :conditions => { :method => :get }
-    map.connect "#{resouce}", :controller => "foo", :conditions => { :method => :post }
-    map.connect "#{resouce}/new", :controller => "foo", :conditions => { :method => :get }
-    map.connect "#{resouce}/:id/edit", :controller => "foo", :conditions => { :method => :get }
-    map.connect "#{resouce}/:id", :controller => "foo", :conditions => { :method => :get }
-    map.connect "#{resouce}/:id", :controller => "foo", :conditions => { :method => :put }
-    map.connect "#{resouce}/:id", :controller => "foo", :conditions => { :method => :delete }
+  resources.each do |resource|
+    map.resource resource.to_s
   end
 
   map.connect ":controller/:action/:id"
@@ -26,7 +28,7 @@ Env = {
   "PATH_INFO" => "/zz/1"
 }
 
-Routes = Rack::Mount::RouteSet.new
+Routes = Rack::Mount::RouteSet.new(:compactor => false)
 Routes.draw(&Map)
 
 require 'benchmark'

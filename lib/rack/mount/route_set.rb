@@ -3,6 +3,15 @@ module Rack
     class RouteSet < Bucket
       include GarbageCompactor
 
+      DEFAULT_OPTIONS = {
+        :compactor => true
+      }.freeze
+
+      def initialize(options = {})
+        @options = DEFAULT_OPTIONS.dup.merge!(options)
+        super()
+      end
+
       def draw(&block)
         Mappers::RailsClassic.new(self).draw(&block)
         freeze
@@ -47,7 +56,8 @@ module Rack
       end
 
       def freeze
-        compact!
+        compact! if @options[:compactor]
+
         super
       end
 
