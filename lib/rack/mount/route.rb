@@ -1,6 +1,8 @@
 module Rack
   module Mount
     class Route
+      include Graphing::RouteHelper
+
       SKIP_RESPONSE = [404, {"Content-Type" => "text/html"}, "Not Found"]
       HTTP_METHODS = ["GET", "HEAD", "POST", "PUT", "DELETE"]
 
