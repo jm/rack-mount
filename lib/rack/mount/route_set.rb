@@ -11,7 +11,7 @@ module Rack
 
       def initialize(options = {})
         @options = DEFAULT_OPTIONS.dup.merge!(options)
-        @root = Bucket.new
+        @root = NestedSet.new
       end
 
       def draw(&block)
@@ -56,14 +56,9 @@ module Rack
       end
 
       def each_key_from_route(route)
-        route.methods.each do |method|
-          if route.dynamic?
-            yield method, nil
-          else
-            first_segment = route.path.slice(SegmentString::FIRST_SEGMENT_REGEXP)
-            yield method, first_segment
-          end
-        end
+        first_segment = route.dynamic? ? nil :
+          route.path.slice(SegmentString::FIRST_SEGMENT_REGEXP)
+        yield route.method, first_segment
       end
 
       def freeze
@@ -74,7 +69,7 @@ module Rack
       end
 
       def worst_case
-        @root.longest_value
+        @root.depth
       end
 
       def to_graph

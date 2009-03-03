@@ -33,10 +33,6 @@ module Rack
         @dynamic
       end
 
-      def methods
-        Array(@method || HTTP_METHODS)
-      end
-
       def call(env)
         method = env["REQUEST_METHOD"]
         path = env["PATH_INFO"]

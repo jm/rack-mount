@@ -1,13 +1,13 @@
 module Rack
   module Mount
     module Graphing
-      module ListHelper
+      module BucketHelper
         def to_graph_nodes
           %{node#{object_id} [label = "{ #{map { |value| value }.join("|")} }"];}
         end
       end
 
-      module BucketHelper
+      module NestedSetHelper
         def to_graph_nodes
           graphs = []
 

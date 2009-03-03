@@ -1,8 +1,8 @@
 module Rack
   module Mount
-    class Bucket < Hash
-      class List < Array
-        include Graphing::ListHelper
+    class NestedSet < Hash
+      class Bucket < Array
+        include Graphing::BucketHelper
 
         def [](key)
           raise ArgumentError, "no random access"
@@ -14,20 +14,20 @@ module Rack
         end
       end
 
-      include Graphing::BucketHelper
+      include Graphing::NestedSetHelper
 
       def initialize
-        @default = List.new
+        @default = Bucket.new
         super(@default)
       end
 
       def []=(key, *values)
         values.flatten!
 
-        if key.nil? && values.length == 1
-          self << values.shift
+        if key.nil?
+          self << values.pop
         elsif values.length > 1
-          super(key, Bucket.new) unless has_key?(key)
+          super(key, NestedSet.new) unless has_key?(key)
           self[key][values.shift] = values
         elsif value = values.shift
           v = self[key]
@@ -63,13 +63,10 @@ module Rack
         super
       end
 
-      def longest_value
-        values.max { |a, b|
-          a_len, b_len = a.length, b.length
-          a_len = a.longest_value if a.respond_to?(:longest_value)
-          b_len = b.longest_value if a.respond_to?(:longest_value)
-          a_len <=> b_len
-        }.length
+      def depth
+        values.map { |v|
+          v.is_a?(NestedSet) ? v.depth : v.length
+        }.max { |a, b| a <=> b }
       end
     end
   end
