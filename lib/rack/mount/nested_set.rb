@@ -16,9 +16,8 @@ module Rack
 
       include Graphing::NestedSetHelper
 
-      def initialize
-        @default = Bucket.new
-        super(@default)
+      def initialize(default = Bucket.new)
+        super(@default = default)
       end
 
       def []=(key, *values)
@@ -26,28 +25,31 @@ module Rack
 
         if key.nil?
           self << values.pop
-        elsif values.length > 1
-          super(key, NestedSet.new) unless has_key?(key)
-          self[key][values.shift] = values
-        elsif value = values.shift
-          v = self[key]
-          v = v.dup if v.equal?(@default)
-          v << value
-          super(key, v)
+          return
         end
+
+        v = self[key]
+        v = v.dup if v.equal?(@default)
+
+        if values.length > 1
+          v = NestedSet.new(v) if v.is_a?(Bucket)
+          v[values.shift] = values
+        elsif value = values.shift
+          v << value
+        end
+
+        super(key, v)
       end
 
+      alias_method :at, :[]
+
       def [](*keys)
-        if keys.length > 1
-          keys.inject(self) do |b, k|
-            if b.is_a?(Array)
-              return b
-            else
-              b[k]
-            end
+        keys.inject(self) do |b, k|
+          if b.is_a?(Array)
+            return b
+          else
+            b.at(k)
           end
-        else
-          super(*keys)
         end
       end
 

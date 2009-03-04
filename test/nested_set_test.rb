@@ -52,6 +52,7 @@ class NestedSetTest < Test::Unit::TestCase
   def test_nested_buckets_with_defaults
     root = NestedSet.new
 
+    root["/admin"] = "/admin/accounts/new"
     root["/admin", "/people"] = "/admin/people"
     root["/admin", "/people"] = "/admin/people/1"
     root["/admin"] = "/admin/:controller/edit"
@@ -60,11 +61,11 @@ class NestedSetTest < Test::Unit::TestCase
     root[nil, "/companies"] = "/:namespace/companies"
     root[nil] = "/:controller/:action"
 
-    assert_equal ["/admin/people", "/admin/people/1", "/admin/:controller/edit", "/admin/people/new", "/:namespace/companies", "/:controller/:action"], root["/admin", "/people"]
-    assert_equal ["/admin/:controller/edit", "/admin/companies", "/:namespace/companies", "/:controller/:action"], root["/admin", "/companies"]
-    assert_equal ["/admin/:controller/edit", "/:namespace/companies", "/:controller/:action"], root["/admin", "/notfound"]
+    assert_equal ["/admin/accounts/new", "/admin/people", "/admin/people/1", "/admin/:controller/edit", "/admin/people/new", "/:namespace/companies", "/:controller/:action"], root["/admin", "/people"]
+    assert_equal ["/admin/accounts/new", "/admin/:controller/edit", "/admin/companies", "/:namespace/companies", "/:controller/:action"], root["/admin", "/companies"]
+    assert_equal ["/admin/accounts/new", "/admin/:controller/edit", "/:namespace/companies", "/:controller/:action"], root["/admin", "/notfound"]
     assert_equal ["/:namespace/companies", "/:controller/:action"], root["/notfound"]
-    assert_equal 6, root.depth
+    assert_equal 7, root.depth
   end
 
   def test_freeze
