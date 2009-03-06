@@ -1,6 +1,5 @@
 module Rack
   module Mount
-    autoload :GarbageCompactor, 'rack/mount/garbage_compactor'
     autoload :Graphing, 'rack/mount/graphing'
     autoload :Mappers, 'rack/mount/mappers'
     autoload :NestedSet, 'rack/mount/nested_set'

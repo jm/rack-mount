@@ -1,10 +1,7 @@
 module Rack
   module Mount
     class RouteSet
-      include GarbageCompactor
-
       DEFAULT_OPTIONS = {
-        :compactor => true
       }.freeze
 
       KEYS = [:method, :first_segment]
@@ -63,7 +60,6 @@ module Rack
 
       def freeze
         @root.freeze
-        # compact! if @options[:compactor]
 
         super
       end
