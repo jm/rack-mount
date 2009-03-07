@@ -14,8 +14,19 @@ module Rack
       end
 
       def first_segment
-        @first_segment ||= path.slice(SegmentString::FIRST_SEGMENT_REGEXP)
+        split_segments! unless @first_segment
+        @first_segment
       end
+
+      def second_segment
+        split_segments! unless @second_segment
+        @second_segment
+      end
+
+      private
+        def split_segments!
+          _, @first_segment, @second_segment = path.split("/")
+        end
     end
   end
 end

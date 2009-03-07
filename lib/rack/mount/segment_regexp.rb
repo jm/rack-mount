@@ -6,8 +6,8 @@ module Rack
         super(regexp)
       end
 
-      def dynamic_first_segment?
-        true
+      def segments_keys
+        []
       end
 
       def recognizer

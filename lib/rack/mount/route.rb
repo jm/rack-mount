@@ -22,13 +22,17 @@ module Rack
           SegmentString.new(@path, @requirements)
 
         # Mark as dynamic only if the first segment is dynamic
-        @dynamic = segment.dynamic_first_segment?
+        @segments_keys = segment.segments_keys
         @recognizer = segment.recognizer
         @params = segment.params
       end
 
       def first_segment
-        @dynamic ? nil : path.slice(SegmentString::FIRST_SEGMENT_REGEXP)
+        @segments_keys[1]
+      end
+
+      def second_segment
+        @segments_keys[2]
       end
 
       def to_s

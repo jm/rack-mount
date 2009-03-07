@@ -65,18 +65,21 @@ module Rack
         nil
       end
 
+      def values_with_default
+        values.push(default)
+      end
+
       def inspect
         super.gsub(/\}$/, ", nil => #{default.inspect}}")
       end
 
       def freeze
-        default.freeze
-        values.each { |v| v.freeze }
+        values_with_default.each { |v| v.freeze }
         super
       end
 
       def depth
-        values.map { |v|
+        values_with_default.map { |v|
           v.is_a?(NestedSet) ? v.depth : v.length
         }.max { |a, b| a <=> b }
       end

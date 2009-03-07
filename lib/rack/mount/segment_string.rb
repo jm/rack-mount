@@ -5,7 +5,6 @@ module Rack
       PARAM_REGEXP = /^:(\w+)$/
       GLOB_REGEXP  = /^\\\*(\w+)$/
       SEGMENT_REGEXP = /[^\/\.\?]+|[\/\.\?]/
-      FIRST_SEGMENT_REGEXP = /[^\/]+/
 
       def initialize(str, requirements = {})
         raise ArgumentError unless str.is_a?(String)
@@ -15,8 +14,14 @@ module Rack
         super(str)
       end
 
-      def dynamic_first_segment?
-        segments[1] =~ PARAM_REGEXP ? true : false
+      def segments_keys
+        segments.join.split("/").map { |segment|
+          if segment == "" || segment =~ PARAM_REGEXP || segment =~ GLOB_REGEXP
+            nil
+          else
+            segment
+          end
+        }
       end
 
       def segments

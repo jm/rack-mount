@@ -2,12 +2,12 @@ module Rack
   module Mount
     class RouteSet
       DEFAULT_OPTIONS = {
+        :keys => [:method, :first_segment]
       }.freeze
-
-      KEYS = [:method, :first_segment]
 
       def initialize(options = {})
         @options = DEFAULT_OPTIONS.dup.merge!(options)
+        @keys = @options.delete(:keys)
         @root = NestedSet.new
       end
 
@@ -29,14 +29,14 @@ module Rack
 
       def add_route(options = {})
         route = Route.new(options)
-        keys = KEYS.map { |key| route.send(key) }
+        keys = @keys.map { |key| route.send(key) }
         @root[*keys] = route
         route
       end
 
       def call(env)
         env_str = Request.new(env)
-        keys = KEYS.map { |key| env_str.send(key) }
+        keys = @keys.map { |key| env_str.send(key) }
         @root[*keys].each do |route|
           result = route.call(env)
           return result unless result[0] == 404
