@@ -2,8 +2,6 @@ module Rack
   module Mount
     class NestedSet < Hash
       class Bucket < Array
-        include Graphing::BucketHelper
-
         def [](key)
           raise ArgumentError, "no random access"
         end
@@ -14,34 +12,42 @@ module Rack
         end
       end
 
-      include Graphing::NestedSetHelper
-
       def initialize(default = Bucket.new)
-        super(@default = default)
-      end
-
-      def []=(key, *values)
-        values.flatten!
-
-        if key.nil?
-          self << values.pop
-          return
-        end
-
-        v = self[key]
-        v = v.dup if v.equal?(@default)
-
-        if values.length > 1
-          v = NestedSet.new(v) if v.is_a?(Bucket)
-          v[values.shift] = values
-        elsif value = values.shift
-          v << value
-        end
-
-        super(key, v)
+        super(default)
       end
 
       alias_method :at, :[]
+
+      def []=(*args)
+        args.flatten!
+        value = args.pop
+        key   = args.shift
+        keys  = args
+
+        raise ArgumentError, "missing value" unless value
+
+        v = at(key)
+        v = v.dup if v.equal?(default)
+
+        if key.nil?
+          if keys.empty?
+            self << value
+          else
+            values.each do |v|
+              v[keys] = value
+            end
+            default << value
+          end
+        else
+          if keys.empty?
+            v << value
+          else
+            v = NestedSet.new(v) if v.is_a?(Bucket)
+            v[*keys] = value
+          end
+          super(key, v)
+        end
+      end
 
       def [](*keys)
         keys.inject(self) do |b, k|
@@ -54,13 +60,17 @@ module Rack
       end
 
       def <<(value)
-        @default << value
+        default << value
         values.each { |e| e << value }
         nil
       end
 
+      def inspect
+        super.gsub(/\}$/, ", nil => #{default.inspect}}")
+      end
+
       def freeze
-        @default.freeze
+        default.freeze
         values.each { |v| v.freeze }
         super
       end
@@ -69,6 +79,22 @@ module Rack
         values.map { |v|
           v.is_a?(NestedSet) ? v.depth : v.length
         }.max { |a, b| a <=> b }
+      end
+
+      def to_graph
+        require 'rack/mount/graphviz_ext'
+
+        g = GraphViz::new("G")
+        g[:nodesep] = ".05"
+        g[:rankdir] = "LR"
+
+        g.node[:shape] = "record"
+        g.node[:width] = ".1"
+        g.node[:height] = ".1"
+
+        g.add_object(self)
+
+        g
       end
     end
   end

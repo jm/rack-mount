@@ -1,8 +1,6 @@
 module Rack
   module Mount
     class Route
-      include Graphing::RouteHelper
-
       SKIP_RESPONSE = [404, {"Content-Type" => "text/html"}, "Not Found"]
       HTTP_METHODS = ["GET", "HEAD", "POST", "PUT", "DELETE"]
 
@@ -27,6 +25,10 @@ module Rack
         @dynamic = segment.dynamic_first_segment?
         @recognizer = segment.recognizer
         @params = segment.params
+      end
+
+      def to_s
+        "#{method} #{path}"
       end
 
       def dynamic?
