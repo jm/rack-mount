@@ -29,33 +29,19 @@ module Rack
 
       def add_route(options = {})
         route = Route.new(options)
-        each_key_from_route(route) do |method, first_segment|
-          @root[method, first_segment] = route
-        end
+        keys = KEYS.map { |key| route.send(key) }
+        @root[*keys] = route
         route
       end
 
       def call(env)
-        method, first_segment = key_from_env(env)
-        bucket_or_hash = @root[method, first_segment]
-        bucket_or_hash.each do |route|
+        env_str = Request.new(env)
+        keys = KEYS.map { |key| env_str.send(key) }
+        @root[*keys].each do |route|
           result = route.call(env)
           return result unless result[0] == 404
         end
         nil
-      end
-
-      def key_from_env(env)
-        method = env["REQUEST_METHOD"]
-        path = env["PATH_INFO"]
-        first_segment = path.slice(SegmentString::FIRST_SEGMENT_REGEXP)
-        return method, first_segment
-      end
-
-      def each_key_from_route(route)
-        first_segment = route.dynamic? ? nil :
-          route.path.slice(SegmentString::FIRST_SEGMENT_REGEXP)
-        yield route.method, first_segment
       end
 
       def freeze

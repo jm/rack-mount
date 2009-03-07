@@ -27,12 +27,12 @@ module Rack
         @params = segment.params
       end
 
-      def to_s
-        "#{method} #{path}"
+      def first_segment
+        @dynamic ? nil : path.slice(SegmentString::FIRST_SEGMENT_REGEXP)
       end
 
-      def dynamic?
-        @dynamic
+      def to_s
+        "#{method} #{path}"
       end
 
       def call(env)
